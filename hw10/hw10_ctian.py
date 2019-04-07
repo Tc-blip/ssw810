@@ -11,7 +11,7 @@ class Repository:
         self.p_major = os.path.join(path,'majors.txt')
         self.students = {}
         self.instructors = {}
-        self.majors = defaultdict(lambda:defaultdict(list))
+        self.majors = {}
 
     def file_reader(self, path, num_fields=3, sep='\t', header=False):
         try:
@@ -50,10 +50,11 @@ class Repository:
                 self.instructors[tinstructor].dict_course_num(tCouse)
     
     def read_major(self):
-        course_flag = defaultdict(list)
         for major,tflag,tcourse in self.file_reader(self.p_major,3,'\t',False):
-            self.majors[major][tflag].append(tcourse)
-
+            self.majors[major] = Major(major)
+        for major,tflag,tcourse in self.file_reader(self.p_major,3,'\t',False):
+            self.majors[major].add_tflag[tflag].append(tcourse)
+        
 
     def student_summary(self):
         pt = PrettyTable(field_names=['CWID','Name','Completed Courses'])
@@ -70,12 +71,15 @@ class Repository:
                 pt.add_row([CWID,Name,Dept,Course,Students])
         print(pt)
         return pt
-    '''
+
     def major_summary(self):
         pt = PrettyTable(field_names=['Dept','Required','Electives'])
-        for dept in self.read_major.values():
-            for required
-    '''
+        for dept in self.majors.values():
+            for i,j,e in dept.prettytable():
+                pt.add_row([i,j,e])
+        print(pt)
+            
+
 class Student:
     def __init__(self, CWID, tName, tMajor):
         self.CWID = CWID
@@ -88,6 +92,11 @@ class Student:
 
     def prettytable(self):
         yield self.CWID, self.tName, sorted(list(self.course_grade))
+
+    def remain(self, course):
+        if self.course_grade[course] not in ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']:
+            return course
+
 
 
 class Instructor:
@@ -105,16 +114,28 @@ class Instructor:
             yield self.CWID, self.tName, self.tDepartment,tCourse ,tStudents
 
 
+class Major:
+    def __init__(self,major):
+        self.major = major
+        self.add_tflag = defaultdict(list)
 
+    def add_major(self, tflag, tcourse):
+        self.add_tflag[tflag].append(tcourse)
+
+    def prettytable(self):
+        yield self.major, self.add_tflag['R'], self.add_tflag['E']
 
 def main(path):
     dd = Repository(path)
     dd.read_student()
     dd.read_instructor()
     dd.read_grades()
+    dd.read_major()
     dd.student_summary()
     dd.instructor_summary()
-    dd.read_major()
+    dd.major_summary()
+
+   
 
 if __name__ == "__main__":
     path = '/Users/TC/iCloudDrive/Desktop/ssw810/hw10'
