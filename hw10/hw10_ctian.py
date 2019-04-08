@@ -55,12 +55,22 @@ class Repository:
         for major,tflag,tcourse in self.file_reader(self.p_major,3,'\t',False):
             self.majors[major].add_tflag[tflag].append(tcourse)
         
+    def add_remain(self):
+        for c_student in self.students.values():
+            for course in self.majors[c_student.tMajor].get_required():
+                if c_student.check_completed(course):
+                    c_student.remain_rlist.append(course)
+            
+            for course in self.majors[c_student.tMajor].get_electives():
+                if not c_student.check_completed(course):
+                    c_student.remain_elist.append(course)
+
 
     def student_summary(self):
-        pt = PrettyTable(field_names=['CWID','Name','Completed Courses'])
+        pt = PrettyTable(field_names=['CWID','Name','Completed Courses','r','e'])
         for c_student in self.students.values():
-            for cwid,name,cc in c_student.prettytable():
-                pt.add_row([cwid, name, cc ])
+            for cwid,name,cc ,r,e in c_student.prettytable():
+                pt.add_row([cwid, name, cc ,r,e])
         print(pt)
         return pt
     
@@ -85,17 +95,24 @@ class Student:
         self.CWID = CWID
         self.tName = tName
         self.tMajor = tMajor
-        self.course_grade = defaultdict(str)
+        self.course_grade = dict()
+        self.remain_rlist = []
+        self.remain_elist = []
 
     def dict_course_grade(self, course, grade):
         self.course_grade[course] = grade
 
     def prettytable(self):
-        yield self.CWID, self.tName, sorted(list(self.course_grade))
+        yield self.CWID, self.tName, sorted(list(self.course_grade)), self.remain_rlist, self.remain_elist
 
-    def remain(self, course):
-        if self.course_grade[course] not in ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']:
-            return course
+    def check_completed(self, course):
+        if course not in self.course_grade:
+            return True
+        else:
+            if self.course_grade[course] not in ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']:
+                return True
+    
+    
 
 
 
@@ -122,18 +139,31 @@ class Major:
     def add_major(self, tflag, tcourse):
         self.add_tflag[tflag].append(tcourse)
 
+    def get_required(self):
+        return self.add_tflag['R']
+    
+    def get_electives(self):
+        return self.add_tflag['E']
+
     def prettytable(self):
-        yield self.major, self.add_tflag['R'], self.add_tflag['E']
+        yield self.major, self.get_required(), self.get_electives()
+
+
+    
+
 
 def main(path):
     dd = Repository(path)
+    dd.read_major()
     dd.read_student()
     dd.read_instructor()
     dd.read_grades()
-    dd.read_major()
+    dd.add_remain()
     dd.student_summary()
     dd.instructor_summary()
     dd.major_summary()
+    d=[]
+    
 
    
 
