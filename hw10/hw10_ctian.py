@@ -57,16 +57,20 @@ class Repository:
 
     def add_remain(self):
         for c_student in self.students.values():
-            for course in self.majors[c_student.tMajor].get_required():
-                if c_student.check_completed(course):
-                    c_student.remain_rlist.append(course)
+            try:
+                for course in self.majors[c_student.tMajor].get_required():
+                    if c_student.check_completed(course):
+                        c_student.remain_rlist.append(course)
+            
 
-            for course in self.majors[c_student.tMajor].get_electives():
-                if not c_student.check_completed(course):
-                    break
-            else:
-                c_student.remain_elist.extend(
-                    self.majors[c_student.tMajor].get_electives())
+                for course in self.majors[c_student.tMajor].get_electives():
+                    if not c_student.check_completed(course):
+                        break
+                else:
+                    c_student.remain_elist.extend(
+                        self.majors[c_student.tMajor].get_electives())
+            except KeyError as e:
+                raise KeyError(f"we don't have {e} dept")
 
     def student_summary(self):
         pt = PrettyTable(
