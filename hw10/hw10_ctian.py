@@ -92,6 +92,7 @@ class Repository:
             for i, j, e in dept.prettytable():
                 pt.add_row([i, j, e])
         print(pt)
+        return pt
 
 
 class Student:
