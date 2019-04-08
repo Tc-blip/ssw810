@@ -70,7 +70,7 @@ class Repository:
 
     def student_summary(self):
         pt = PrettyTable(
-            field_names=['CWID', 'Name', 'Completed Courses', 'r', 'e'])
+            field_names=['CWID', 'Name', 'Completed Courses', 'Remaining Required', 'Remaining Elective'])
         for c_student in self.students.values():
             for cwid, name, cc, r, e in c_student.prettytable():
                 pt.add_row([cwid, name, cc, r, e])
