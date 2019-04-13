@@ -2,6 +2,18 @@ from collections import defaultdict
 from prettytable import PrettyTable
 import os
 
+import sqlite3
+
+def data_base(path):
+    db = sqlite3.connect(path)
+    query = '''SELECT i.CWID, i.Name, i.Dept, g.Course, count(g.Student_CWID) as Student from HW11_instructors i
+    left join HW11_grades g on i.CWID = g.Instructor_CWID group by g.Course;'''
+    pt = PrettyTable(
+        field_names=['CWID', 'Name', 'Dept', 'Course', 'Students'])
+    for CWID, Name, Dept, Course, Students in db.execute(query):
+        pt.add_row([CWID, Name, Dept, Course, Students])
+    print(pt)
+
 
 class Repository:
     def __init__(self, path):
@@ -172,6 +184,8 @@ def main(path):
 
 
 if __name__ == "__main__":
-    path = '/Users/TC/iCloudDrive/Desktop/ssw810/hw10'
-    path_mac = '/Users/chengtian/Desktop/ssw810/hw10'
-    main(path_mac)
+    path = '/Users/TC/iCloudDrive/Desktop/ssw810/hw11'
+    path_mac = '/Users/chengtian/Desktop/ssw810/hw11'
+    database_path = '/Users/chengtian/Desktop/810/hw11/hw11_startup.db'
+    #main(path_mac)
+    data_base(database_path)
